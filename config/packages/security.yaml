@@ -1,18 +1,35 @@
 security:
-    # https://symfony.com/doc/current/security.html#registering-the-user-hashing-passwords
+    # Password hashing configuration
     password_hashers:
         Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface: 'auto'
-    # https://symfony.com/doc/current/security.html#loading-the-user-the-user-provider
+
+    # In-memory user provider with admin and user
     providers:
-        users_in_memory: { memory: null }
+        in_memory:
+            memory:
+                users:
+                    admin:
+                        password: '$2y$13$gGNqBG2ZQ9CNy79HKs.eOOsrgDoME4Vb3VjtPSz3KnPOQLO4sb7iq' # hashed password "admin"
+                        roles: ['ROLE_ADMIN', 'ROLE_USER']
+                    user:
+                        password: '$2y$13$gGNqBG2ZQ9CNy79HKs.eOOsrgDoME4Vb3VjtPSz3KnPOQLO4sb7iq' # hashed password "user"
+                        roles: ['ROLE_USER']
     firewalls:
         dev:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
+
         main:
             lazy: true
-            provider: users_in_memory
+            http_basic: ~
+            provider: in_memory
 
+            
+            # Add logout functionality
+            logout:
+                path: app_logout
+                target: 
+            
             # activate different ways to authenticate
             # https://symfony.com/doc/current/security.html#the-firewall
 
@@ -20,11 +37,10 @@ security:
             # switch_user: true
 
     # Easy way to control access for large sections of your site
-    # Note: Only the *first* access control that matches will be used
+    # Note: Only the first access control that matches will be used
     access_control:
-        # - { path: ^/admin, roles: ROLE_ADMIN }
-        # - { path: ^/profile, roles: ROLE_USER }
         - { path: ^/dashboard, roles: ROLE_USER }
+        # - { path: ^/admin, roles: ROLE_ADMIN }
 
 when@test:
     security:
@@ -38,3 +54,4 @@ when@test:
                 cost: 4 # Lowest possible value for bcrypt
                 time_cost: 3 # Lowest possible value for argon
                 memory_cost: 10 # Lowest possible value for argon
+                
